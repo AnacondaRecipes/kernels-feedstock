@@ -6,13 +6,17 @@ package:
   version: {{ version }}
 
 source:
-  # GitHub archive rather than the PyPI sdist: the 0.13.0 sdist does not bundle
-  # the LICENSE file (Apache-2.0 is declared as text only), and AR requires
-  # license_file. The GitHub tag ships LICENSE at the repo root, and the version
-  # is hardcoded in pyproject.toml (no setuptools_scm), so building from the
-  # archive is equivalent.
-  url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 1ae1b2862cfd62a64f0d3bac196f46d097d4f45b1a779ccfc714eeeb81fa0212
+  # Build from the PyPI sdist (a proper standalone project: pyproject.toml at
+  # root, src/ layout). Its only shortcoming is that it does not bundle the
+  # LICENSE file, and AR requires license_file. The GitHub tag is a monorepo
+  # (kernels/, kernel-builder/, kernel-abi-check/) whose LICENSE lives at the
+  # archive root, so it cannot be the build source directly — it is pulled into
+  # license_src/ solely to satisfy license_file.
+  - url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+    sha256: bf7908206009bff0017d09b87f0f6b5934a1a20520562caf1cbb06cab36418cc
+  - url: https://github.com/huggingface/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+    sha256: 1ae1b2862cfd62a64f0d3bac196f46d097d4f45b1a779ccfc714eeeb81fa0212
+    folder: license_src
 
 build:
   number: 0
@@ -58,7 +62,7 @@ about:
     kernels into PyTorch layers at runtime.
   license: Apache-2.0
   license_family: Apache
-  license_file: LICENSE
+  license_file: license_src/LICENSE
   doc_url: https://huggingface.co/docs/kernels
   dev_url: https://github.com/huggingface/kernels
 
